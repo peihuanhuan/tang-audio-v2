@@ -1,25 +1,14 @@
 import logo from './logo.svg';
 import './App.css';
+import { hot } from 'react-hot-loader/root';
+import Main from './Main'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    return (
+    <div style={{padding: "24px 36px 0"}}>
+        <Main></Main>
     </div>
   );
 }
 
-export default App;
+export default hot(App);
