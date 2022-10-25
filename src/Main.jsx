@@ -6,14 +6,18 @@ import Icon, { IconHelpCircle } from '@douyinfe/semi-icons';
 import {analyticalTypeHints, shareTypeHints} from './desc'
 import apiClient from "./http-common";
 import {useQuery, useMutation,} from 'react-query'
+import queryString from 'query-string';
+
+import {localStorageGet, localStorageSet} from './expire-localstore'
+
 
 function BusyBanner() {
     return <div style={{margin: "12px -36px 4px"}}>
         <Banner
-            closeIcon={null} type="warning"
+            closeIcon={null} type="danger"
             description={
                 <div style={{height: "72px", verticalAlign: "middle", display: "table-cell"}}>
-                    当前服务器拥挤，前方 120 个任务，请耐心静候。当前服务器拥挤，前方 120 个任务，请耐心静候。
+                    当前服务器拥挤，前方 120 个任务，请耐心静候。
                 </div>
             }
         />
@@ -47,6 +51,43 @@ export default function Main() {
     const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[1])
     const [buttonLoading, setButtonLoading] = useState(false)
 
+    const { mutate: getAuthorizationUrl } = useMutation(
+        ()=> {return apiClient.get(`wx/wx32b8546599fad714/user/authorizationUrl?scope=snsapi_userinfo&redirectUri=${window.location.href}`);},
+        {
+            onSuccess: (data) => {
+                if (!data) {
+                    return
+                }
+                window.location.href = data
+            },
+        }
+    );
+
+    const { isLoading: _, mutate: login } = useMutation(
+        code => {
+            return apiClient.post(`wx/wx32b8546599fad714/user/login?code=${code}`);
+        },
+        {
+            onSuccess: (data) => {
+                if (!data) {
+                    return
+                }
+                localStorageSet("token", data, 7)
+            },
+        }
+    );
+
+    useEffect(() =>{
+        let token = localStorageGet("token")
+        if (!token) {
+            let code = queryString.parse(window.location.search)["code"]
+            if (code) {
+                login(code)
+            } else {
+                getAuthorizationUrl()
+            }
+        }
+    },[])
 
     function shareTypeChange(x) {
         let value = x.target.value;
@@ -55,34 +96,23 @@ export default function Main() {
     }
 
 
-    const { isLoading: submitting, mutate: updateTutorial } = useMutation(
-        event=> {
-            console.log('event',event)
-            return apiClient.post(`/bilibili/audio`, JSON.stringify(event), );
+    const { isLoading: submitting, mutate: submit } = useMutation(
+        values=> {
+            return apiClient.post(`/bilibili/audio`, JSON.stringify(values), );
         },
         {
-            onSuccess: (res) => {
-                const data = res.data
-                if (res.data.code !== 200) {
-                    let opts = {
-                        title: 'Hi, 亲爱的哔友',
-                        content: data.msg,
-                        duration: 8,
-                    };
-                    Notification.error({...opts, position: 'top'})
-                } else {
-                    let opts = {
-                        title: 'Hi, 亲爱的哔友',
-                        content: data.data,
-                        duration: 5,
-                    };
-                    Notification.success(opts)
-                    localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
+            onSuccess: (data) => {
+                if (!data) {
+                    return
                 }
+                let opts = {
+                    title: 'Hi, 亲爱的哔友',
+                    content: data,
+                    duration: 5,
+                };
+                Notification.success(opts)
+                localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
             },
-            onError: (err) => {
-                Toast.error({ content: JSON.stringify(err) })
-            }
         }
     );
 
@@ -105,7 +135,7 @@ export default function Main() {
 
             <Form
                 onSubmit={values=> {
-                    updateTutorial(values)
+                    submit(values)
                 }}
             >
 
