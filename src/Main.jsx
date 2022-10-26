@@ -11,13 +11,15 @@ import queryString from 'query-string';
 import {localStorageGet, localStorageSet} from './expire-localstore'
 
 
-function BusyBanner() {
-    return <div style={{margin: "12px -36px 4px"}}>
+function BusyBanner(props) {
+    const before = props.before
+    return <div style={{margin: "12px -16px 4px"}}>
         <Banner
-            closeIcon={null} type="danger"
+            closeIcon={null}
+            type="danger"
             description={
                 <div style={{height: "72px", verticalAlign: "middle", display: "table-cell"}}>
-                    当前服务器拥挤，前方 120 个任务，请耐心静候。
+                    当前服务器拥挤，前方 {before} 个任务，请耐心排队静候。
                 </div>
             }
         />
@@ -27,10 +29,7 @@ function BusyBanner() {
 let DATA_LOCAL_STORAGE_KEY = "data";
 let SHARE_TYPE_LOCAL_STORAGE_KEY = "shareType";
 
-const data = [
-    { key: '已完成任务数量', value: '148,000' },
-    { key: '总时长', value: '1,3231小时' },
-];
+
 
 const shareRadioDesc = () => {
     return (
@@ -47,9 +46,20 @@ const shareRadioDesc = () => {
 
 export default function Main() {
 
+    console.log("render...")
+
     const [analyticalTypeHint, setAnalyticalTypeHint] = useState(analyticalTypeHints[1])
     const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[1])
     const [buttonLoading, setButtonLoading] = useState(false)
+    const [successTask, setSuccessTask] = useState("loading...")
+    const [totalDuration, setTotalDuration] = useState("loading...")
+    const [tasksAheadCount, setTasksAheadCount] = useState(0)
+
+    const data = [
+        { key: '已完成任务数量', value: successTask },
+        { key: '总时长(分钟)', value: totalDuration },
+    ];
+
 
     const { mutate: getAuthorizationUrl } = useMutation(
         ()=> {return apiClient.get(`wx/wx32b8546599fad714/user/authorizationUrl?scope=snsapi_userinfo&redirectUri=${window.location.href}`);},
@@ -88,6 +98,48 @@ export default function Main() {
             }
         }
     },[])
+
+    const { refetch: fetchStatus } = useQuery('status',
+        code => {
+            return apiClient.get(`bilibili/audio/status`);
+        },
+        {
+            onSuccess: (data) => {
+                setSuccessTask(data.successSubTaskCnt.toLocaleString())
+                setTotalDuration(Math.round((data.successSubTaskDuration / 60 )).toLocaleString())
+                setTasksAheadCount(data.tasksAhead)
+            },
+        }
+    );
+
+    useEffect(() => {
+        console.log("只会第一次render 出现")
+        const interval = setInterval(() => {
+            fetchStatus()
+        }, 15000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+
+    const { refetch: fetchSubscribeStatus } = useQuery('subscribeStatus',
+        code => {
+            return apiClient.get(`wx/wx32b8546599fad714/user`);
+        },
+        {
+            onSuccess: (data) => {
+                if (data.subscribeStatus !== "ON") {
+
+                }
+            },
+        }
+    );
+
+    useEffect(() => {
+        console.log("只会第一次render 出现")
+        fetchSubscribeStatus()
+    }, []);
+
 
     function shareTypeChange(x) {
         let value = x.target.value;
@@ -129,9 +181,9 @@ export default function Main() {
     return(
         <div>
             <div style={{color: 'var(--semi-color-primary)', fontSize: "18px", fontWeight: 700, lineHeight: "24px"}}>阿烫哔站音视频提取</div>
-            <Divider margin={8}/>
+            <Divider margin={4}/>
             <Descriptions data={data} row/>
-            {true ? <BusyBanner />: null}
+            {(tasksAheadCount > 0) ? <BusyBanner before={tasksAheadCount} />: null}
 
             <Form
                 onSubmit={values=> {
@@ -154,7 +206,7 @@ export default function Main() {
                 <TextArea  rules={[{ required: true, message: '请填写视频链接' },]}  field='data' label={"视频链接"} style={{background: 'var( --semi-color-tertiary-light-default)',}}
                            onChange={(data) => localStorage.setItem(DATA_LOCAL_STORAGE_KEY, data)}
                            initValue={defaultData}
-                          autosize rows={12} placeholder={analyticalTypeHint}/>
+                          autosize rows={8} placeholder={analyticalTypeHint}/>
 
                 <RadioGroup field='shareType' label={shareRadioDesc()} onChange={shareTypeChange} initValue={defaultShareType}>
                     <Radio value="1">百度云盘</Radio>
@@ -162,7 +214,7 @@ export default function Main() {
                 </RadioGroup>
                 <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
 
-                <Button htmlType='submit' loading={buttonLoading} type="warning" theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>提交</Button>
+                <Button disabled={true}  style={{colorButtonDisabledBgDefault: "0xfffff"}} htmlType='submit' loading={buttonLoading} type="warning" theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>提交</Button>
 
             </Form>
         </div>

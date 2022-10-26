@@ -13,7 +13,7 @@ function App() {
     return (
         <QueryClientProvider client={queryClient}>
 
-            <div style={{padding: "24px 36px 0"}}>
+            <div style={{padding: "16px 16px 0"}}>
                 <Main></Main>
             </div>
 
