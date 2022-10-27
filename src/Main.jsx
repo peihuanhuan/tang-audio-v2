@@ -50,10 +50,13 @@ export default function Main() {
 
     const [analyticalTypeHint, setAnalyticalTypeHint] = useState(analyticalTypeHints[1])
     const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[1])
-    const [buttonLoading, setButtonLoading] = useState(false)
     const [successTask, setSuccessTask] = useState("loading...")
     const [totalDuration, setTotalDuration] = useState("loading...")
     const [tasksAheadCount, setTasksAheadCount] = useState(0)
+
+    const [enableSubmit, setEnableSubmit] = useState(false)
+    const [buttonLoading, setButtonLoading] = useState(false)
+    const [buttonText, setButtonText] = useState("提交")
 
     const data = [
         { key: '已完成任务数量', value: successTask },
@@ -128,8 +131,12 @@ export default function Main() {
         },
         {
             onSuccess: (data) => {
-                if (data.subscribeStatus !== "ON") {
-
+                setButtonLoading(false)
+                if (data["subscribeStatus"] !== "ON") {
+                    setButtonText("需要关注公众号以接收消息通知...")
+                } else {
+                    setButtonText("提交")
+                    setEnableSubmit(true)
                 }
             },
         }
@@ -137,6 +144,9 @@ export default function Main() {
 
     useEffect(() => {
         console.log("只会第一次render 出现")
+        setButtonLoading(true)
+        setEnableSubmit(false)
+        setButtonText("正在检查是否关注公众号")
         fetchSubscribeStatus()
     }, []);
 
@@ -214,7 +224,7 @@ export default function Main() {
                 </RadioGroup>
                 <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
 
-                <Button disabled={true}  style={{colorButtonDisabledBgDefault: "0xfffff"}} htmlType='submit' loading={buttonLoading} type="warning" theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>提交</Button>
+                <Button disabled={!enableSubmit}  htmlType='submit' loading={buttonLoading} theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>{buttonText}</Button>
 
             </Form>
         </div>
