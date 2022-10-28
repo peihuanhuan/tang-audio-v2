@@ -1,6 +1,6 @@
-import {Component, useEffect, useState} from "react";
+import {Component, useEffect, useState, useRef} from "react";
 
-import {  Descriptions, Form, Tooltip, Banner, Divider, Button, Toast, Notification} from '@douyinfe/semi-ui';
+import {  Descriptions, Form, Tooltip, Banner, Divider, Button, Toast, Notification, Popconfirm} from '@douyinfe/semi-ui';
 import Icon, { IconHelpCircle } from '@douyinfe/semi-icons';
 
 import {analyticalTypeHints, shareTypeHints} from './desc'
@@ -28,8 +28,11 @@ function BusyBanner(props) {
 
 let DATA_LOCAL_STORAGE_KEY = "data";
 let SHARE_TYPE_LOCAL_STORAGE_KEY = "shareType";
+let LAST_SUCCESS_TASK_ID = "lastSuccessTaskId"
 
-
+const DEFAULT_STATUS = "DEFAULT"
+const FAIL_STATUS = "FAIL"
+const SUCCESS_STATUS = "SUCCESS"
 
 const shareRadioDesc = () => {
     return (
@@ -57,6 +60,11 @@ export default function Main() {
     const [enableSubmit, setEnableSubmit] = useState(false)
     const [buttonLoading, setButtonLoading] = useState(false)
     const [buttonText, setButtonText] = useState("提交")
+
+    const [retryVisible, setRetryVisible] = useState(false);
+    const [lastTaskId, setLastTaskId] = useState(0);
+    const [cancelRetry, setCancelRetry] = useState(false);
+
 
     const data = [
         { key: '已完成任务数量', value: successTask },
@@ -102,6 +110,7 @@ export default function Main() {
         }
     },[])
 
+
     const { refetch: fetchStatus } = useQuery('status',
         code => {
             return apiClient.get(`bilibili/audio/status`);
@@ -111,6 +120,30 @@ export default function Main() {
                 setSuccessTask(data.successSubTaskCnt.toLocaleString())
                 setTotalDuration(Math.round((data.successSubTaskDuration / 60 )).toLocaleString())
                 setTasksAheadCount(data.tasksAhead)
+                setLastTaskId(data.task?.id)
+                const taskStatus = data.task?.status ?? ""
+                if (taskStatus === FAIL_STATUS || taskStatus === SUCCESS_STATUS) {
+                    setButtonLoading(false)
+                    setButtonText(`提交`)
+
+                    if (taskStatus === SUCCESS_STATUS) {
+                        const last = localStorage.getItem(LAST_SUCCESS_TASK_ID)
+
+                        if (parseInt(last) !== data.task?.id) {
+                            localStorage.setItem(LAST_SUCCESS_TASK_ID, data.task?.id)
+                            Notification.success({title: data.task.name, content: `任务已完成，进入公众号回复【音频】获得结果`, duration: 5,})
+                        }
+                    }
+                    if (taskStatus === FAIL_STATUS) {
+                        setRetryVisible(true)
+                    }
+
+                } else if (taskStatus === DEFAULT_STATUS) {
+                    setButtonLoading(true)
+                    setButtonText(`上个任务转换中: ${data.task?.successSubTaskCount ?? 0}/${data.task?.subTaskSize ?? 0}`)
+                }
+
+
             },
         }
     );
@@ -130,6 +163,9 @@ export default function Main() {
             return apiClient.get(`wx/wx32b8546599fad714/user`);
         },
         {
+            // 仅请求一次， 永不过期
+            staleTime: Infinity,
+            cacheTime: Infinity,
             onSuccess: (data) => {
                 setButtonLoading(false)
                 if (data["subscribeStatus"] !== "ON") {
@@ -143,7 +179,7 @@ export default function Main() {
     );
 
     useEffect(() => {
-        console.log("只会第一次render 出现")
+        console.log("fetchSubscribeStatus 出现")
         setButtonLoading(true)
         setEnableSubmit(false)
         setButtonText("正在检查是否关注公众号")
@@ -164,29 +200,42 @@ export default function Main() {
         },
         {
             onSuccess: (data) => {
-                if (!data) {
-                    return
-                }
-                let opts = {
-                    title: 'Hi, 亲爱的哔友',
-                    content: data,
-                    duration: 5,
-                };
-                Notification.success(opts)
+                if (!data) { return }
+                const countRegexp = /[0-9]+/g;
+                Notification.success({title: 'Hi, 亲爱的哔友', content: data, duration: 5,})
                 localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
+                api.current.setValue("data", "") // 清空
+                setButtonText(`上个任务转换中: 0/${data.match(countRegexp)}`)
+
             },
         }
     );
 
-    useEffect(() => {
-        setButtonLoading(submitting)
-    }, [submitting]);
+    const { mutate: retry } = useMutation(
+        ()=> {
+            return apiClient.post(`/bilibili/audio/retry`, JSON.stringify({"taskId": lastTaskId}), );
+        },
+        {
+            onSuccess: (data) => {
+                if (!data) { return }
+                Toast.success('重试成功')
+                setRetryVisible(false)
+                setButtonLoading(true)
+                setButtonText(`上个任务重试中: ${data.success}/${data.total}`)
+            },
+        }
+    );
+
+    // useEffect(() => {
+    //     setButtonLoading(submitting)
+    // }, [submitting]);
 
 
     const defaultShareType = localStorage.getItem(SHARE_TYPE_LOCAL_STORAGE_KEY) || "1"
     const defaultData = localStorage.getItem(DATA_LOCAL_STORAGE_KEY) || ""
 
     const {TextArea, RadioGroup, Radio } = Form;
+    const api = useRef();
 
     return(
         <div>
@@ -195,9 +244,25 @@ export default function Main() {
             <Descriptions data={data} row/>
             {(tasksAheadCount > 0) ? <BusyBanner before={tasksAheadCount} />: null}
 
-            <Form
+            <Popconfirm
+                visible={retryVisible && !cancelRetry} // 手动cancel过就不再提示
+                onVisibleChange={visible => setRetryVisible(visible)}
+                title="上一个任务失败，是否重试？"
+                onConfirm={() => {
+                    retry()
+                    setCancelRetry(false)
+                }}
+                onCancel={() => setCancelRetry(true)}
+            >
+            </Popconfirm>
+            <Form getFormApi={formApi => api.current = formApi}
                 onSubmit={values=> {
-                    submit(values)
+                    // 避免重复提交
+                    if (!submitting) {
+                        setButtonLoading(true)
+                        setButtonText(`解析中...`)
+                        submit(values)
+                    }
                 }}
             >
 
