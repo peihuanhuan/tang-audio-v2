@@ -49,7 +49,6 @@ const shareRadioDesc = () => {
 
 export default function Main() {
 
-    console.log("render...")
 
     const [analyticalTypeHint, setAnalyticalTypeHint] = useState(analyticalTypeHints[1])
     const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[1])
@@ -61,9 +60,14 @@ export default function Main() {
     const [buttonLoading, setButtonLoading] = useState(false)
     const [buttonText, setButtonText] = useState("提交")
 
+    const [subscribeStatus, setSubscribeStatus] = useState("OFF")
+
     const [retryVisible, setRetryVisible] = useState(false);
     const [lastTaskId, setLastTaskId] = useState(0);
     const [cancelRetry, setCancelRetry] = useState(false);
+
+
+    console.log("render...", buttonText)
 
 
     const data = [
@@ -76,9 +80,7 @@ export default function Main() {
         ()=> {return apiClient.get(`wx/wx32b8546599fad714/user/authorizationUrl?scope=snsapi_userinfo&redirectUri=${window.location.href}`);},
         {
             onSuccess: (data) => {
-                if (!data) {
-                    return
-                }
+                if (!data) { return}
                 window.location.href = data
             },
         }
@@ -90,9 +92,7 @@ export default function Main() {
         },
         {
             onSuccess: (data) => {
-                if (!data) {
-                    return
-                }
+                if (!data) { return }
                 localStorageSet("token", data, 7)
             },
         }
@@ -117,6 +117,7 @@ export default function Main() {
         },
         {
             onSuccess: (data) => {
+                if (!data) { return }
                 setSuccessTask(data.successSubTaskCnt.toLocaleString())
                 setTotalDuration(Math.round((data.successSubTaskDuration / 60 )).toLocaleString())
                 setTasksAheadCount(data.tasksAhead)
@@ -124,7 +125,10 @@ export default function Main() {
                 const taskStatus = data.task?.status ?? ""
                 if (taskStatus === FAIL_STATUS || taskStatus === SUCCESS_STATUS) {
                     setButtonLoading(false)
-                    setButtonText(`提交`)
+                    if (subscribeStatus === "ON") {
+                        setButtonText("提交")
+                    }
+
 
                     if (taskStatus === SUCCESS_STATUS) {
                         const last = localStorage.getItem(LAST_SUCCESS_TASK_ID)
@@ -151,7 +155,10 @@ export default function Main() {
     useEffect(() => {
         console.log("只会第一次render 出现")
         const interval = setInterval(() => {
-            fetchStatus()
+            if (localStorageGet("token")) {
+                console.log("定时请求 fetchStatus")
+                fetchStatus()
+            }
         }, 15000);
 
         return () => clearInterval(interval);
@@ -167,18 +174,23 @@ export default function Main() {
             staleTime: Infinity,
             cacheTime: Infinity,
             onSuccess: (data) => {
+                if (!data) { return }
+                setSubscribeStatus(data.subscribeStatus)
                 setButtonLoading(false)
+                setEnableSubmit(true)
                 if (data["subscribeStatus"] !== "ON") {
-                    setButtonText("需要关注公众号以接收消息通知...")
+                    setButtonText("需要关注公众号【阿烫】以接收结果（点我跳转）")
                 } else {
                     setButtonText("提交")
-                    setEnableSubmit(true)
                 }
             },
         }
     );
 
     useEffect(() => {
+        if (!localStorageGet("token")) {
+            return
+        }
         console.log("fetchSubscribeStatus 出现")
         setButtonLoading(true)
         setEnableSubmit(false)
@@ -200,7 +212,11 @@ export default function Main() {
         },
         {
             onSuccess: (data) => {
-                if (!data) { return }
+                if (!data) {
+                    setButtonLoading(false)
+                    setButtonText("提交")
+                    return
+                }
                 const countRegexp = /[0-9]+/g;
                 Notification.success({title: 'Hi, 亲爱的哔友', content: data, duration: 5,})
                 localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
@@ -239,11 +255,11 @@ export default function Main() {
 
     return(
         <div>
-            <div style={{color: 'var(--semi-color-primary)', fontSize: "18px", fontWeight: 700, lineHeight: "24px"}}>阿烫哔站音视频提取</div>
-            <Divider margin={4}/>
+            {/*<div style={{color: 'var(--semi-color-primary)', fontSize: "18px", fontWeight: 700, lineHeight: "24px"}}>阿烫哔站音视频提取</div>*/}
+
             <Descriptions data={data} row/>
             {(tasksAheadCount > 0) ? <BusyBanner before={tasksAheadCount} />: null}
-
+            <Divider margin={4}/>
             <Popconfirm
                 visible={retryVisible && !cancelRetry} // 手动cancel过就不再提示
                 onVisibleChange={visible => setRetryVisible(visible)}
@@ -257,6 +273,11 @@ export default function Main() {
             </Popconfirm>
             <Form getFormApi={formApi => api.current = formApi}
                 onSubmit={values=> {
+                    if (subscribeStatus === "OFF") {
+                        console.log("ssss")
+                        return
+                    }
+                    console.log("xxxx")
                     // 避免重复提交
                     if (!submitting) {
                         setButtonLoading(true)
@@ -273,7 +294,7 @@ export default function Main() {
 
                 <RadioGroup field="type" label='解析模式' onChange={(x) => {setAnalyticalTypeHint(analyticalTypeHints[x.target.value])}}
                             initValue={"1"}>
-                    <Radio value="1">自由</Radio>
+                    <Radio value="1">默认</Radio>
                     <Radio value="2">分p稿件</Radio>
                     <Radio value="3">Up主</Radio>
                 </RadioGroup>
@@ -288,8 +309,11 @@ export default function Main() {
                     <Radio value="2">阿里云盘</Radio>
                 </RadioGroup>
                 <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
-
-                <Button disabled={!enableSubmit}  htmlType='submit' loading={buttonLoading} theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>{buttonText}</Button>
+                <Button onClick={() => {
+                    if (subscribeStatus === "OFF") {
+                        window.location = "https://mp.weixin.qq.com/s/GTQTcUzQ8tcWNlubEC1D3A"
+                    }
+                }} disabled={!enableSubmit}  htmlType='submit' loading={buttonLoading} theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>{buttonText}</Button>
 
             </Form>
         </div>

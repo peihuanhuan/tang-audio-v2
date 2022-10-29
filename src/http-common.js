@@ -19,12 +19,12 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
     response =>{
         if (response.data.code !== 200) {
-            let opts = {
-                title: '发生了一些错误',
-                content: response.data.msg,
-                duration: 8,
-            };
-            Notification.error({...opts, position: 'top'})
+            // 忽略认证错误
+            if (response.data.code !== 702) {
+                let opts = {title: '发生了一些错误', content: response.data.msg, duration: 8,};
+                Notification.error({...opts, position: 'top'})
+            }
+
         }
         return response.data.data
     },
