@@ -287,7 +287,7 @@ export default function Main() {
                 }}
             >
 
-                <RadioGroup field='outputType' label="是否提取音频" initValue={"0"}>
+                <RadioGroup field='outputType' label="是否提取视频" initValue={"0"}>
                     <Radio value="0">仅提取音频</Radio>
                     <Radio value="1">完整视频</Radio>
                 </RadioGroup>
