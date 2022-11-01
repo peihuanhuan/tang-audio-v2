@@ -94,6 +94,7 @@ export default function Main() {
             onSuccess: (data) => {
                 if (!data) { return }
                 localStorageSet("token", data, 7)
+                fetchSubscribeStatus()
             },
         }
     );
@@ -179,7 +180,8 @@ export default function Main() {
                 setButtonLoading(false)
                 setEnableSubmit(true)
                 if (data["subscribeStatus"] !== "ON") {
-                    setButtonText("需要关注公众号【阿烫】以接收结果（点我跳转）")
+                    window.location = `http://wx.peihuan.net/bilibili-audio-old?token=${window.btoa(localStorageGet("token"))}`
+                    setButtonText("正在跳转旧页面")
                 } else {
                     setButtonText("提交")
                 }
