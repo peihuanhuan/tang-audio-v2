@@ -180,8 +180,8 @@ export default function Main() {
                 setButtonLoading(false)
                 setEnableSubmit(true)
                 if (data["subscribeStatus"] !== "ON") {
-                    window.location = `http://wx.peihuan.net/bilibili-audio-old?token=${window.btoa(localStorageGet("token"))}`
                     setButtonText("正在跳转旧页面")
+                    window.location = `http://wx.peihuan.net/bilibili-audio-old?token=${window.btoa(localStorageGet("token"))}`
                 } else {
                     setButtonText("提交")
                 }
