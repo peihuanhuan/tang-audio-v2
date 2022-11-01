@@ -194,7 +194,7 @@ export default function Main() {
         console.log("fetchSubscribeStatus 出现")
         setButtonLoading(true)
         setEnableSubmit(false)
-        setButtonText("正在检查是否关注公众号")
+        setButtonText("正在前置检查")
         fetchSubscribeStatus()
     }, []);
 
