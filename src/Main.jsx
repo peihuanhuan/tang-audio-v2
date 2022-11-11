@@ -1,6 +1,6 @@
 import {Component, useEffect, useState, useRef} from "react";
 
-import {  Descriptions, Form, Tooltip, Banner, Divider, Button, Toast, Notification, Popconfirm} from '@douyinfe/semi-ui';
+import {  Descriptions, Form, Tooltip, Modal, Banner, Divider, Button, Toast, Notification, Popconfirm} from '@douyinfe/semi-ui';
 import Icon, { IconHelpCircle } from '@douyinfe/semi-icons';
 
 import {analyticalTypeHints, shareTypeHints} from './desc'
@@ -50,8 +50,11 @@ const shareRadioDesc = () => {
 export default function Main() {
 
 
+    const defaultShareType = localStorage.getItem(SHARE_TYPE_LOCAL_STORAGE_KEY) || "1"
+
+
     const [analyticalTypeHint, setAnalyticalTypeHint] = useState(analyticalTypeHints[1])
-    const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[1])
+    const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[defaultShareType])
     const [successTask, setSuccessTask] = useState("loading...")
     const [totalDuration, setTotalDuration] = useState("loading...")
     const [tasksAheadCount, setTasksAheadCount] = useState(0)
@@ -65,6 +68,9 @@ export default function Main() {
     const [retryVisible, setRetryVisible] = useState(false);
     const [lastTaskId, setLastTaskId] = useState(0);
     const [cancelRetry, setCancelRetry] = useState(false);
+
+    const [baiduAuthModalVisible, setBaiduAuthModalVisible] = useState(false)
+    const [hasBaiduAuthorization, setHasBaiduAuthorization] = useState(false)
 
 
     console.log("render...", buttonText)
@@ -85,6 +91,18 @@ export default function Main() {
             },
         }
     );
+
+    const { mutate: getBaiduAuthorizationUrl } = useMutation(
+        // ()=> {return apiClient.get(`baidu/authorizationUrl?redirectUri=http://localhost:3000/baidu-authorization&scope=1`);},
+        ()=> {return apiClient.get(`baidu/authorizationUrl?redirectUri=http://wx.peihuan.net/bilibili-audio/baidu-authorization&scope=1`);},
+        {
+            onSuccess: (data) => {
+                if (!data) { return}
+                window.location.href = data
+            },
+        }
+    );
+
 
     const { isLoading: _, mutate: login } = useMutation(
         code => {
@@ -177,10 +195,11 @@ export default function Main() {
             onSuccess: (data) => {
                 if (!data) { return }
                 setSubscribeStatus(data.subscribeStatus)
+                setHasBaiduAuthorization(data.baiduAuthorization)
                 setButtonLoading(false)
                 setEnableSubmit(true)
                 if (data["subscribeStatus"] !== "ON") {
-                    setButtonText("正在跳转旧页面")
+                    setButtonText("正在跳转老版本")
                     window.location = `http://wx.peihuan.net/bilibili-audio-old?token=${window.btoa(localStorageGet("token"))}`
                 } else {
                     setButtonText("提交")
@@ -205,6 +224,9 @@ export default function Main() {
         let value = x.target.value;
         setShareTypeHint(shareTypeHints[value])
         localStorage.setItem(SHARE_TYPE_LOCAL_STORAGE_KEY, value);
+        if (value === "3") {
+            setBaiduAuthModalVisible(true)
+        }
     }
 
 
@@ -249,7 +271,6 @@ export default function Main() {
     // }, [submitting]);
 
 
-    const defaultShareType = localStorage.getItem(SHARE_TYPE_LOCAL_STORAGE_KEY) || "1"
     const defaultData = localStorage.getItem(DATA_LOCAL_STORAGE_KEY) || ""
 
     const {TextArea, RadioGroup, Radio } = Form;
@@ -276,10 +297,12 @@ export default function Main() {
             <Form getFormApi={formApi => api.current = formApi}
                 onSubmit={values=> {
                     if (subscribeStatus === "OFF") {
-                        console.log("ssss")
                         return
                     }
-                    console.log("xxxx")
+                    if(values.shareType === "3" && !hasBaiduAuthorization) {
+                        setBaiduAuthModalVisible(true)
+                        return;
+                    }
                     // 避免重复提交
                     if (!submitting) {
                         setButtonLoading(true)
@@ -307,6 +330,7 @@ export default function Main() {
                           autosize rows={8} placeholder={analyticalTypeHint}/>
 
                 <RadioGroup field='shareType' label={shareRadioDesc()} onChange={shareTypeChange} initValue={defaultShareType}>
+                    <Radio value="3">百度免分享</Radio>
                     <Radio value="1">百度云盘</Radio>
                     <Radio value="2">阿里云盘</Radio>
                 </RadioGroup>
@@ -318,6 +342,17 @@ export default function Main() {
                 }} disabled={!enableSubmit}  htmlType='submit' loading={buttonLoading} theme="solid" style={{width: "100%", height:"50px", margin: "12px 0 0px 0"}}>{buttonText}</Button>
 
             </Form>
+            <Modal
+                title="授权百度网盘"
+                visible={baiduAuthModalVisible}
+                width="80%"
+                onOk={getBaiduAuthorizationUrl}
+                onCancel={() => setBaiduAuthModalVisible(false)}
+                closeOnEsc={true}
+            >
+                授权之后阿烫才能将文件上传至你的网盘 "/我的应用数据/阿烫/" 目录下
+                <br />
+            </Modal>
         </div>
     )
 }
