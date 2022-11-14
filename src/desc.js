@@ -20,5 +20,5 @@ export const analyticalTypeHints = {
 export const shareTypeHints = {
     "1": "比较稳定，下载速度慢",
     "2": "下载快，敏感词较多，偶尔分享失败，不是很稳定",
-    "3": "无需手动保存分享，最稳定，最省事（测试中，可能有bug）",
+    "3": "无需手动保存分享，最稳定，最省事",
 }

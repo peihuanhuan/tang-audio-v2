@@ -224,7 +224,7 @@ export default function Main() {
         let value = x.target.value;
         setShareTypeHint(shareTypeHints[value])
         localStorage.setItem(SHARE_TYPE_LOCAL_STORAGE_KEY, value);
-        if (value === "3") {
+        if (value === "3" && !hasBaiduAuthorization) {
             setBaiduAuthModalVisible(true)
         }
     }
