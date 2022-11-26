@@ -283,17 +283,20 @@ export default function Main() {
             <Descriptions data={data} row/>
             {(tasksAheadCount > 0) ? <BusyBanner before={tasksAheadCount} />: null}
             <Divider margin={4}/>
-            <Popconfirm
-                visible={retryVisible && !cancelRetry} // 手动cancel过就不再提示
-                onVisibleChange={visible => setRetryVisible(visible)}
-                title="上一个任务失败，是否重试？"
-                onConfirm={() => {
+            <Modal
+                title="是否重试？"
+                visible={retryVisible && !cancelRetry}
+                width="80%"
+                onOk={() => {
                     retry()
                     setCancelRetry(false)
                 }}
                 onCancel={() => setCancelRetry(true)}
+                closeOnEsc={true}
             >
-            </Popconfirm>
+                上个任务失败，多次尝试仍失败，大概率因为文件名包含敏感词无法分享。
+                <br/><br/>使用【百度免分享】方式可解决此问题
+            </Modal>
             <Form getFormApi={formApi => api.current = formApi}
                 onSubmit={values=> {
                     if (subscribeStatus === "OFF") {
