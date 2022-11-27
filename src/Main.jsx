@@ -325,6 +325,7 @@ export default function Main() {
                     <Radio value="1">默认</Radio>
                     <Radio value="2">分p稿件</Radio>
                     <Radio value="3">Up主</Radio>
+                    <Radio value="4">合集模式</Radio>
                 </RadioGroup>
 
                 <TextArea  rules={[{ required: true, message: '请填写视频链接' },]}  field='data' label={"视频链接"} style={{background: 'var( --semi-color-tertiary-light-default)',}}
