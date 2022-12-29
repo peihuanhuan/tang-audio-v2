@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { hot } from 'react-hot-loader/root';
 import Main from './Main'
+import WeixinLogin from './page/WeixinLogin'
 import BaiduAuthorize from './page/BaiduAuthorize'
 import {
     createBrowserRouter,
@@ -15,23 +16,23 @@ const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
     {
-        path: "/",
+        path: "/bilibili-audio",
         element: <Main/>,
     },
     {
-        path: "/baidu-authorization",
+        path: "/bilibili-audio/baidu-authorization",
         element: <BaiduAuthorize/>,
+    },
+    {
+        path: "/bilibili-audio/weixin-authorization",
+        element: <WeixinLogin/>,
     }
     ],
     {
         // nginx subdirectory path
-        basename: "/bilibili-audio"
+        basename: "/"
     });
 function App() {
-
-    let code = queryString.parse(window.location.search)["code"]
-
-
 
     return (
         <QueryClientProvider client={queryClient}>

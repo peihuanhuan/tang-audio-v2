@@ -20,7 +20,7 @@ export default function BaiduAuthorize() {
             onSuccess: (data) => {
                 if (!data) { return }
                 setMsg("授权成功")
-                navigate('/', {});
+                navigate('/bilibili-audio', {});
             },
         }
     );
