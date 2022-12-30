@@ -3,11 +3,11 @@ import {Component, useEffect, useState, useRef} from "react";
 import {
     Image
 } from '@douyinfe/semi-ui';
-import apiClient from "../http-common";
+import apiClient from "../util/http-common";
 import {useQuery, useMutation,} from 'react-query'
 import queryString from 'query-string';
 
-import {localStorageGet, localStorageSet} from '../expire-localstore'
+import {localStorageGet, localStorageSet} from '../util/expire-localstore'
 
 
 import {useSearchParams, useNavigate} from 'react-router-dom';

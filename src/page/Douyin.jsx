@@ -14,33 +14,19 @@ import {
 } from '@douyinfe/semi-ui';
 import Icon, {IconHelpCircle} from '@douyinfe/semi-icons';
 
-import {analyticalTypeHints, shareTypeHints} from './desc'
-import apiClient from "./http-common";
+import {douyinAnalyticalTypeHints, shareTypeHints} from '../desc'
+import apiClient from "../util/http-common";
 import {useQuery, useMutation,} from 'react-query'
 import queryString from 'query-string';
 import {useNavigate} from 'react-router-dom';
 
-import {localStorageGet, localStorageSet} from './expire-localstore'
+import {localStorageGet, localStorageSet} from '../util/expire-localstore'
 
 
-function BusyBanner(props) {
-    const before = props.before
-    return <div style={{margin: "12px -16px 4px"}}>
-        <Banner
-            closeIcon={null}
-            type="danger"
-            description={
-                <div style={{height: "72px", verticalAlign: "middle", display: "table-cell"}}>
-                    当前服务器拥挤，前方 {before} 个任务，请耐心排队静候。
-                </div>
-            }
-        />
-    </div>;
-}
 
 let DATA_LOCAL_STORAGE_KEY = "data";
 let SHARE_TYPE_LOCAL_STORAGE_KEY = "shareType";
-let LAST_SUCCESS_TASK_ID = "lastSuccessTaskId"
+let LAST_SUCCESS_TASK_ID = "lastDouyinSuccessTaskId"
 
 const DEFAULT_STATUS = "DEFAULT"
 const FAIL_STATUS = "FAIL"
@@ -64,11 +50,8 @@ export default function Main() {
     const defaultShareType = localStorage.getItem(SHARE_TYPE_LOCAL_STORAGE_KEY) || "1"
 
 
-    const [analyticalTypeHint, setAnalyticalTypeHint] = useState(analyticalTypeHints[1])
+    const [analyticalTypeHint, setAnalyticalTypeHint] = useState(douyinAnalyticalTypeHints[1])
     const [shareTypeHint, setShareTypeHint] = useState(shareTypeHints[defaultShareType])
-    const [successTask, setSuccessTask] = useState("loading...")
-    const [totalDuration, setTotalDuration] = useState("loading...")
-    const [tasksAheadCount, setTasksAheadCount] = useState(0)
 
     const [enableSubmit, setEnableSubmit] = useState(false)
     const [buttonLoading, setButtonLoading] = useState(false)
@@ -84,17 +67,10 @@ export default function Main() {
     const [hasBaiduAuthorization, setHasBaiduAuthorization] = useState(false)
 
 
-    console.log("render...", buttonText)
-
-
-    const data = [
-        {key: '已完成任务数量', value: successTask},
-        {key: '总时长(分钟)', value: totalDuration},
-    ];
 
     const {mutate: getBaiduAuthorizationUrl} = useMutation(
         () => {
-            return apiClient.get(`baidu/authorizationUrl?redirectUri=http://wx.peihuan.net/bilibili-audio/baidu-authorization&scope=1`);
+            return apiClient.get(`baidu/authorizationUrl?redirectUri=http://wx.peihuan.net/baidu-authorization&scope=1`);
         },
         {
             onSuccess: (data) => {
@@ -108,27 +84,28 @@ export default function Main() {
 
     const navigate = useNavigate();
 
+    useEffect(() => {
+        document.title = '阿烫抖音视频提取'
+    }, [])
+
 
     useEffect(() => {
         let token = localStorageGet("token")
         if (!token) {
-            navigate(`/bilibili-audio/weixin-authorization?redirectUrl=${window.location.href}`, {});
+            navigate(`/weixin-authorization?redirectUrl=${window.location.href}`, {});
         }
     }, [])
 
 
     const {refetch: fetchStatus} = useQuery('status',
         code => {
-            return apiClient.get(`bilibili/audio/status`);
+            return apiClient.get(`douyin/video/status`);
         },
         {
             onSuccess: (data) => {
                 if (!data) {
                     return
                 }
-                setSuccessTask(data.successSubTaskCnt.toLocaleString())
-                setTotalDuration(Math.round((data.successSubTaskDuration / 60)).toLocaleString())
-                setTasksAheadCount(data.tasksAhead)
                 setLastTaskId(data.task?.id)
                 const taskStatus = data.task?.status ?? ""
                 if (taskStatus === FAIL_STATUS || taskStatus === SUCCESS_STATUS) {
@@ -194,8 +171,7 @@ export default function Main() {
                 setButtonLoading(false)
                 setEnableSubmit(true)
                 if (data["subscribeStatus"] !== "ON") {
-                    setButtonText("正在跳转老版本")
-                    window.location = `http://wx.peihuan.net/bilibili-audio-old?token=${window.btoa(localStorageGet("token"))}`
+                    setButtonText("微信限制，请先关注公众号【阿烫】")
                 } else {
                     setButtonText("提交")
                 }
@@ -227,7 +203,7 @@ export default function Main() {
 
     const {isLoading: submitting, mutate: submit} = useMutation(
         values => {
-            return apiClient.post(`/bilibili/audio`, JSON.stringify(values),);
+            return apiClient.post(`/douyin/video`, JSON.stringify(values),);
         },
         {
             onSuccess: (data) => {
@@ -237,7 +213,7 @@ export default function Main() {
                     return
                 }
                 const countRegexp = /[0-9]+/g;
-                Notification.success({title: 'Hi, 亲爱的哔友', content: data, duration: 5,})
+                Notification.success({title: 'Hi, 朋友', content: data, duration: 5,})
                 localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
                 api.current.setValue("data", "") // 清空
                 setButtonText(`上个任务转换中: 0/${data.match(countRegexp)}`)
@@ -248,7 +224,7 @@ export default function Main() {
 
     const {mutate: retry} = useMutation(
         () => {
-            return apiClient.post(`/bilibili/audio/retry`, JSON.stringify({"taskId": lastTaskId}),);
+            return apiClient.post(`/douyin/video/retry`, JSON.stringify({"taskId": lastTaskId}),);
         },
         {
             onSuccess: (data) => {
@@ -271,10 +247,6 @@ export default function Main() {
 
     return (
         <div>
-
-            <Descriptions data={data} row/>
-            {(tasksAheadCount > 0) ? <BusyBanner before={tasksAheadCount}/> : null}
-            <Divider margin={4}/>
             <Modal
                 title="是否重试？"
                 visible={retryVisible && !cancelRetry}
@@ -313,16 +285,13 @@ export default function Main() {
                 </RadioGroup>
 
                 <RadioGroup field="type" label='解析模式' onChange={(x) => {
-                    setAnalyticalTypeHint(analyticalTypeHints[x.target.value])
+                    setAnalyticalTypeHint(douyinAnalyticalTypeHints[x.target.value])
                 }}
                             initValue={"1"}>
                     <Radio value="1">默认</Radio>
-                    <Radio value="2">分p稿件</Radio>
-                    <Radio value="4">合集</Radio>
-                    <Radio value="3">Up主</Radio>
                 </RadioGroup>
 
-                <TextArea rules={[{required: true, message: '请填写视频链接'},]} field='data' label={"视频链接"}
+                <TextArea rules={[{required: true, message: '请填写视频链接'},]} field='data' label={"抖音视频链接"}
                           style={{background: 'var( --semi-color-tertiary-light-default)',}}
                           onChange={(data) => localStorage.setItem(DATA_LOCAL_STORAGE_KEY, data)}
                           initValue={defaultData}
@@ -337,6 +306,7 @@ export default function Main() {
                 <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
                 <Button onClick={() => {
                     if (subscribeStatus === "OFF") {
+                        //todo
                         window.location = "https://mp.weixin.qq.com/s/GTQTcUzQ8tcWNlubEC1D3A"
                     }
                 }} disabled={!enableSubmit} htmlType='submit' loading={buttonLoading} theme="solid"

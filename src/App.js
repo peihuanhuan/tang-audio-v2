@@ -1,7 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import { hot } from 'react-hot-loader/root';
-import Main from './Main'
+import Main from './page/Main'
+import Douyin from './page/Douyin'
 import WeixinLogin from './page/WeixinLogin'
 import BaiduAuthorize from './page/BaiduAuthorize'
 import {
@@ -16,16 +17,24 @@ const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
     {
+        path: "/",
+        element: <Main/>,
+    },
+    {
         path: "/bilibili-audio",
         element: <Main/>,
     },
     {
-        path: "/bilibili-audio/baidu-authorization",
+        path: "/baidu-authorization",
         element: <BaiduAuthorize/>,
     },
     {
-        path: "/bilibili-audio/weixin-authorization",
+        path: "/weixin-authorization",
         element: <WeixinLogin/>,
+    },
+    {
+        path: "/douyin-video",
+        element: <Douyin/>,
     }
     ],
     {

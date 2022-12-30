@@ -1,7 +1,7 @@
 {
   "name": "tang-audio",
   "version": "0.1.0",
-  "homepage": "./",
+  "homepage": "/",
   "private": true,
   "dependencies": {
     "@douyinfe/semi-ui": "^2.21.2",

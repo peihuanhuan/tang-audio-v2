@@ -1,4 +1,4 @@
-export const analyticalTypeHints = {
+export const bilibiliAnalyticalTypeHints = {
     "1": `一次最多 10 个视频，不同链接间换行。少量多次稳定快速。
 
 举个🌰,导出这二位的音频: 👇👇👇
@@ -21,6 +21,9 @@ export const analyticalTypeHints = {
 一次只支持一个合集。`
 }
 
+export const douyinAnalyticalTypeHints = {
+    "1": `直接粘贴分享内容，自动解析抖音视频。`,
+}
 
 export const shareTypeHints = {
     "1": "比较稳定，下载速度慢",

@@ -3,7 +3,7 @@ import {  Notification} from '@douyinfe/semi-ui';
 import {localStorageGet} from './expire-localstore'
 
 const instance = axios.create({
-    baseURL: "https://wx.peihuan.net/",
+    baseURL: "https://wx.peihuan.net/api",
     headers: {
         'Content-Type': 'application/json'
     }

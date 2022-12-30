@@ -1,9 +1,9 @@
 import { Spin ,Image, ImagePreview} from '@douyinfe/semi-ui';
 import queryString from 'query-string';
 import {useEffect, useState} from "react";
-import {localStorageGet, localStorageSet} from "../expire-localstore";
+import {localStorageGet, localStorageSet} from "../util/expire-localstore";
 import {useMutation} from "react-query";
-import apiClient from "../http-common";
+import apiClient from "../util/http-common";
 import { useNavigate } from 'react-router-dom';
 
 export default function BaiduAuthorize() {
