@@ -14,7 +14,7 @@ export default function BaiduAuthorize() {
 
     const { isLoading: _, mutate: baiduAuth } = useMutation(
         code => {
-            return apiClient.post(`baidu/code?code=${code}&redirectUri=http://wx.peihuan.net/bilibili-audio/baidu-authorization`);
+            return apiClient.post(`baidu/code?code=${code}&redirectUri=${window.location.href}`);
         },
         {
             onSuccess: (data) => {
