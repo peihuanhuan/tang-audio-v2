@@ -14,7 +14,8 @@ export default function BaiduAuthorize() {
 
     const { isLoading: _, mutate: baiduAuth } = useMutation(
         code => {
-            return apiClient.post(`baidu/code?code=${code}&redirectUri=${window.location.href}`);
+            //  redirectUri 不能带参数，必须和配置里的一模一样
+            return apiClient.post(`baidu/code?code=${code}&redirectUri=${window.location.href.split('?')[0]}`);
         },
         {
             onSuccess: (data) => {
