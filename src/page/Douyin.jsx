@@ -122,7 +122,7 @@ export default function Main() {
                             localStorage.setItem(LAST_SUCCESS_TASK_ID, data.task?.id)
                             Notification.success({
                                 title: data.task.name,
-                                content: `任务已完成，进入公众号回复【音频】获得结果`,
+                                content: `抖音任务已完成，进入公众号回复【抖音】获得结果`,
                                 duration: 5,
                             })
                         }
