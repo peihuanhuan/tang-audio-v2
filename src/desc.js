@@ -23,6 +23,7 @@ export const bilibiliAnalyticalTypeHints = {
 
 export const douyinAnalyticalTypeHints = {
     "1": `直接粘贴分享内容，自动解析抖音视频。一次最多 10 个视频，不同视频间换行。少量多次稳定快速。`,
+    "3": `将作者的抖音主页链接（或分享口令）粘贴到此，会自动解析其视频，实际数量由视频时长决定，最多200个`,
 }
 
 export const shareTypeHints = {

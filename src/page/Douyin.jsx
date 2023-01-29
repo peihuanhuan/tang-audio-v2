@@ -289,6 +289,7 @@ export default function Main() {
                 }}
                             initValue={"1"}>
                     <Radio value="1">默认</Radio>
+                    <Radio value="3">作者主页</Radio>
                 </RadioGroup>
 
                 <TextArea rules={[{required: true, message: '请填写视频链接'},]} field='data' label={"抖音视频链接"}
