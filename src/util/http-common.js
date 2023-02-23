@@ -25,6 +25,11 @@ instance.interceptors.response.use(
                 Notification.error({...opts, position: 'top'})
             }
 
+            if (response.data.code === 703) {
+                localStorage.removeItem("token");
+                window.location.reload();
+            }
+
         }
         return response.data.data
     },

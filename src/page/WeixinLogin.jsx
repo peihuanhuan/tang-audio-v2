@@ -19,7 +19,7 @@ export default function WeixinLogin() {
     const redirectUrl = params.getAll('redirectUrl')[0];
 
     const { mutate: getAuthorizationUrl } = useMutation(
-        ()=> {return apiClient.get(`wx/wx32b8546599fad714/user/authorizationUrl?scope=snsapi_userinfo&redirectUri=${window.location.href}`);},
+        ()=> {return apiClient.get(`wx/wx1e172dfca3c637d5/user/authorizationUrl?scope=snsapi_userinfo&redirectUri=${window.location.href}`);},
         {
             onSuccess: (data) => {
                 if (!data) { return }
@@ -32,7 +32,7 @@ export default function WeixinLogin() {
 
     const { isLoading: _, mutate: login } = useMutation(
         code => {
-            return apiClient.post(`wx/wx32b8546599fad714/user/login?code=${code}`);
+            return apiClient.post(`wx/wx1e172dfca3c637d5/user/login?code=${code}`);
         },
         {
             onSuccess: (data) => {
@@ -51,6 +51,8 @@ export default function WeixinLogin() {
             getAuthorizationUrl()
         }
     },[])
+
+    // return (<h1>原公众号被举报永久封禁，新公众号配置中，2.25前恢复</h1>)
 
 
     return(

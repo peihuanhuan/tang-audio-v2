@@ -274,6 +274,8 @@ export default function Main() {
     const {TextArea, RadioGroup, Radio} = Form;
     const api = useRef();
 
+    // return (<h1>原公众号被举报永久封禁，新公众号配置中，2.25前恢复</h1>)
+
     return (
         <div>
 
