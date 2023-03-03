@@ -4,6 +4,7 @@ import { hot } from 'react-hot-loader/root';
 import Main from './page/Main'
 import Douyin from './page/Douyin'
 import WeixinLogin from './page/WeixinLogin'
+import UserLogin from './page/UserLogin'
 import BaiduAuthorize from './page/BaiduAuthorize'
 import {
     createBrowserRouter,
@@ -35,7 +36,11 @@ const router = createBrowserRouter([
     {
         path: "/douyin-video",
         element: <Douyin/>,
-    }
+    },
+        {
+            path: "/email-login",
+            element: <UserLogin/>,
+        }
     ],
     {
         // nginx subdirectory path

@@ -339,7 +339,7 @@ export default function Main() {
                             initValue={defaultShareType}>
                     <Radio value="3">百度免分享</Radio>
                     <Radio value="1">百度云盘</Radio>
-                    <Radio value="2" disabled={true}>阿里云盘</Radio>
+                    <Radio value="2">阿里云盘</Radio>
                 </RadioGroup>
                 <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
                 <Button onClick={() => {
