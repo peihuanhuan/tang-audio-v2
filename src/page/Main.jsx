@@ -23,6 +23,8 @@ import {useNavigate} from 'react-router-dom';
 import {localStorageGet, localStorageSet} from '../util/expire-localstore'
 
 
+let defaultText = `当前任务正在排队中`;
+
 function BusyBanner(props) {
     const before = props.before
     return <div style={{margin: "12px -16px 4px"}}>
@@ -43,6 +45,7 @@ let SHARE_TYPE_LOCAL_STORAGE_KEY = "shareType";
 let LAST_SUCCESS_TASK_ID = "lastSuccessTaskId"
 
 const DEFAULT_STATUS = "DEFAULT"
+const PROCESS_STATUS = "PROCESS"
 const FAIL_STATUS = "FAIL"
 const SUCCESS_STATUS = "SUCCESS"
 
@@ -161,11 +164,14 @@ export default function Main() {
 
                 } else if (taskStatus === DEFAULT_STATUS) {
                     setButtonLoading(true)
+                    setButtonText(defaultText)
+                } else if (taskStatus === PROCESS_STATUS) {
+                    setButtonLoading(true)
                     setButtonText(`上个任务转换中: ${data.task?.successSubTaskCount ?? 0}/${data.task?.subTaskSize ?? 0}`)
                 }
 
 
-            },
+                    },
         }
     );
 
@@ -245,7 +251,7 @@ export default function Main() {
                 Notification.success({title: 'Hi, 亲爱的哔友', content: data, duration: 5,})
                 localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
                 api.current.setValue("data", "") // 清空
-                setButtonText(`上个任务转换中: 0/${data.match(countRegexp)}`)
+                setButtonText(defaultText)
 
             },
         }
