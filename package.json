@@ -44,7 +44,7 @@
     ]
   },
   "devDependencies": {
-    "@douyinfe/semi-webpack-plugin": "^2.21.2",
+    "@douyinfe/semi-webpack-plugin": "^2.33.0",
     "react-app-rewired": "^2.2.1"
   }
 }

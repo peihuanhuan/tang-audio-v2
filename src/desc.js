@@ -5,7 +5,7 @@ export const bilibiliAnalyticalTypeHints = {
 
 【Earthy X6】-哔哩哔哩】 https://b23.tv/IOfEqZw 
 【《香蜜沉沉烬如霜》片尾曲-哔哩哔哩】 https://b23.tv/W3i97LU`,
-    "2": `使用该模式，可以将一个投稿的所有分 P 导出。
+    "2": `使用该模式，可以将一个投稿的所有分 P 或者合集导出。
 
 一次只支持一个投稿视频。
 `,

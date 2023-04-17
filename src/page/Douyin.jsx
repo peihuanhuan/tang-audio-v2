@@ -12,7 +12,7 @@ import {
     Notification,
     Popconfirm
 } from '@douyinfe/semi-ui';
-import Icon, {IconHelpCircle} from '@douyinfe/semi-icons';
+// import Icon, {IconHelpCircle} from '@douyinfe/semi-icons';
 
 import {douyinAnalyticalTypeHints, shareTypeHints} from '../desc'
 import apiClient from "../util/http-common";
@@ -37,7 +37,7 @@ const shareRadioDesc = () => {
         <Tooltip position="right" content={'阿里分享失败后自动使用百度云盘重试'}>
             <div style={{display: "flex", width: "fit-content"}}>
                 <div style={{height: "16px", lineHeight: "16px", padding: "0 4px 0 0"}}>分享方式</div>
-                <IconHelpCircle/>
+                {/*<IconHelpCircle/>*/}
             </div>
         </Tooltip>
     )
@@ -298,7 +298,7 @@ export default function Main() {
                           initValue={defaultData}
                           autosize rows={8} placeholder={analyticalTypeHint}/>
 
-                <RadioGroup field='shareType' label={shareRadioDesc()} onChange={shareTypeChange}
+                <RadioGroup field='shareType' label="分享方式" onChange={shareTypeChange}
                             initValue={defaultShareType}>
                     <Radio value="3">百度免分享</Radio>
                     <Radio value="1">百度云盘</Radio>
