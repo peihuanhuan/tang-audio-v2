@@ -49,6 +49,9 @@ const PROCESS_STATUS = "PROCESS"
 const FAIL_STATUS = "FAIL"
 const SUCCESS_STATUS = "SUCCESS"
 
+let jiexiIng = `解析中...`;
+
+
 const shareRadioDesc = () => {
     return (
         <Tooltip position="right" content={'阿里分享失败后自动使用百度云盘重试'}>
@@ -179,13 +182,17 @@ export default function Main() {
         console.log("只会第一次render 出现")
         const interval = setInterval(() => {
             if (localStorageGet("token")) {
-                console.log("定时请求 fetchStatus")
-                fetchStatus()
+                if (buttonText !== jiexiIng) {
+                    console.log("定时请求 fetchStatus")
+                    fetchStatus()
+                } else {
+                    console.log("提交中,,,, 跳过")
+                }
             }
         }, 15000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [buttonText, jiexiIng]);
 
 
     const {refetch: fetchSubscribeStatus} = useQuery('subscribeStatus',
@@ -243,10 +250,12 @@ export default function Main() {
         {
             onSuccess: (data) => {
                 if (!data) {
+                    console.log("data.....", data)
                     setButtonLoading(false)
                     setButtonText("提交")
                     return
                 }
+                // 不修改 setButtonLoading 是因为一直为 true，因为正在处理中
                 const countRegexp = /[0-9]+/g;
                 Notification.success({title: 'Hi, 亲爱的哔友', content: data, duration: 5,})
                 localStorage.removeItem(DATA_LOCAL_STORAGE_KEY)
@@ -314,7 +323,7 @@ export default function Main() {
                       // 避免重复提交
                       if (!submitting) {
                           setButtonLoading(true)
-                          setButtonText(`解析中...`)
+                          setButtonText(jiexiIng)
                           submit(values)
                       }
                   }}
