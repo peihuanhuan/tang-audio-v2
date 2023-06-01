@@ -68,20 +68,6 @@ export default function Main() {
 
 
 
-    const {mutate: getBaiduAuthorizationUrl} = useMutation(
-        () => {
-            return apiClient.get(`baidu/authorizationUrl?redirectUri=http://wx.peihuan.net/baidu-authorization&scope=1`);
-        },
-        {
-            onSuccess: (data) => {
-                if (!data) {
-                    return
-                }
-                window.location.href = data
-            },
-        }
-    );
-
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -247,84 +233,89 @@ export default function Main() {
 
     return (
         <div>
-            <Modal
-                title="是否重试？"
-                visible={retryVisible && !cancelRetry}
-                width="80%"
-                onOk={() => {
-                    retry()
-                    setCancelRetry(false)
-                }}
-                onCancel={() => setCancelRetry(true)}
-                closeOnEsc={true}
-            >
-                上个任务失败，多次尝试仍失败，大概率因为文件名包含敏感词无法分享。
-                <br/><br/>使用【百度免分享】方式可解决此问题
-            </Modal>
-            <Form getFormApi={formApi => api.current = formApi}
-                  onSubmit={values => {
-                      if (subscribeStatus === "OFF") {
-                          return
-                      }
-                      if (values.shareType === "3" && !hasBaiduAuthorization) {
-                          setBaiduAuthModalVisible(true)
-                          return;
-                      }
-                      // 避免重复提交
-                      if (!submitting) {
-                          setButtonLoading(true)
-                          setButtonText(`解析中...`)
-                          submit(values)
-                      }
-                  }}
-            >
-
-                <RadioGroup field='outputType' label="是否提取视频" initValue={"0"}>
-                    <Radio value="0">仅提取音频</Radio>
-                    <Radio value="1">完整视频</Radio>
-                </RadioGroup>
-
-                <RadioGroup field="type" label='解析模式' onChange={(x) => {
-                    setAnalyticalTypeHint(douyinAnalyticalTypeHints[x.target.value])
-                }}
-                            initValue={"1"}>
-                    <Radio value="1">默认</Radio>
-                    <Radio value="3">作者主页</Radio>
-                </RadioGroup>
-
-                <TextArea rules={[{required: true, message: '请填写视频链接'},]} field='data' label={"抖音视频链接"}
-                          style={{background: 'var( --semi-color-tertiary-light-default)',}}
-                          onChange={(data) => localStorage.setItem(DATA_LOCAL_STORAGE_KEY, data)}
-                          initValue={defaultData}
-                          autosize rows={8} placeholder={analyticalTypeHint}/>
-
-                <RadioGroup field='shareType' label="分享方式" onChange={shareTypeChange}
-                            initValue={defaultShareType}>
-                    <Radio value="3">百度免分享</Radio>
-                    <Radio value="1">百度云盘</Radio>
-                    <Radio value="2">阿里云盘</Radio>
-                </RadioGroup>
-                <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
-                <Button onClick={() => {
-                    if (subscribeStatus === "OFF") {
-                        //todo
-                        window.location = "https://mp.weixin.qq.com/s/GTQTcUzQ8tcWNlubEC1D3A"
-                    }
-                }} disabled={!enableSubmit} htmlType='submit' loading={buttonLoading} theme="solid"
-                        style={{width: "100%", height: "50px", margin: "12px 0 0px 0"}}>{buttonText}</Button>
-
-            </Form>
-            <Modal
-                title="授权百度网盘"
-                visible={baiduAuthModalVisible}
-                width="80%"
-                onOk={getBaiduAuthorizationUrl}
-                onCancel={() => setBaiduAuthModalVisible(false)}
-                closeOnEsc={true}
-            >
-                授权之后阿烫才能将文件上传至你的网盘 "/我的应用数据/阿烫/" 目录下
-                <br/>
-            </Modal>
+            抖音使用人数过少，且接口发生变更，暂停维护中...
         </div>
     )
+    // return (
+    //     <div>
+    //         <Modal
+    //             title="是否重试？"
+    //             visible={retryVisible && !cancelRetry}
+    //             width="80%"
+    //             onOk={() => {
+    //                 retry()
+    //                 setCancelRetry(false)
+    //             }}
+    //             onCancel={() => setCancelRetry(true)}
+    //             closeOnEsc={true}
+    //         >
+    //             上个任务失败，多次尝试仍失败，大概率因为文件名包含敏感词无法分享。
+    //             <br/><br/>使用【百度免分享】方式可解决此问题
+    //         </Modal>
+    //         <Form getFormApi={formApi => api.current = formApi}
+    //               onSubmit={values => {
+    //                   if (subscribeStatus === "OFF") {
+    //                       return
+    //                   }
+    //                   if (values.shareType === "3" && !hasBaiduAuthorization) {
+    //                       setBaiduAuthModalVisible(true)
+    //                       return;
+    //                   }
+    //                   // 避免重复提交
+    //                   if (!submitting) {
+    //                       setButtonLoading(true)
+    //                       setButtonText(`解析中...`)
+    //                       submit(values)
+    //                   }
+    //               }}
+    //         >
+    //
+    //             <RadioGroup field='outputType' label="是否提取视频" initValue={"0"}>
+    //                 <Radio value="0">仅提取音频</Radio>
+    //                 <Radio value="1">完整视频</Radio>
+    //             </RadioGroup>
+    //
+    //             <RadioGroup field="type" label='解析模式' onChange={(x) => {
+    //                 setAnalyticalTypeHint(douyinAnalyticalTypeHints[x.target.value])
+    //             }}
+    //                         initValue={"1"}>
+    //                 <Radio value="1">默认</Radio>
+    //                 <Radio value="3">作者主页</Radio>
+    //             </RadioGroup>
+    //
+    //             <TextArea rules={[{required: true, message: '请填写视频链接'},]} field='data' label={"抖音视频链接"}
+    //                       style={{background: 'var( --semi-color-tertiary-light-default)',}}
+    //                       onChange={(data) => localStorage.setItem(DATA_LOCAL_STORAGE_KEY, data)}
+    //                       initValue={defaultData}
+    //                       autosize rows={8} placeholder={analyticalTypeHint}/>
+    //
+    //             <RadioGroup field='shareType' label="分享方式" onChange={shareTypeChange}
+    //                         initValue={defaultShareType}>
+    //                 <Radio value="3">百度免分享</Radio>
+    //                 <Radio value="1">百度云盘</Radio>
+    //                 <Radio value="2">阿里云盘</Radio>
+    //             </RadioGroup>
+    //             <div style={{color: 'var(--semi-color-text-2)', fontSize: '14px'}}>{shareTypeHint}</div>
+    //             <Button onClick={() => {
+    //                 if (subscribeStatus === "OFF") {
+    //                     //todo
+    //                     window.location = "https://mp.weixin.qq.com/s/GTQTcUzQ8tcWNlubEC1D3A"
+    //                 }
+    //             }} disabled={!enableSubmit} htmlType='submit' loading={buttonLoading} theme="solid"
+    //                     style={{width: "100%", height: "50px", margin: "12px 0 0px 0"}}>{buttonText}</Button>
+    //
+    //         </Form>
+    //         <Modal
+    //             title="授权百度网盘"
+    //             visible={baiduAuthModalVisible}
+    //             width="80%"
+    //             onOk={() => navigate(`/baidu-authorization?redirectUrl=${window.location.href}`, {})}
+    //             onCancel={() => setBaiduAuthModalVisible(false)}
+    //             closeOnEsc={true}
+    //         >
+    //             授权之后阿烫才能将文件上传至你的网盘 "/我的应用数据/阿烫/" 目录下
+    //             <br/>
+    //         </Modal>
+    //     </div>
+    // )
 }

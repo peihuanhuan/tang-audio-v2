@@ -17,6 +17,7 @@ export default function WeixinLogin() {
 
     const [params] = useSearchParams()
     const redirectUrl = params.getAll('redirectUrl')[0];
+    console.log("=== weichat redirectUrl ", redirectUrl, params)
 
     const { mutate: getAuthorizationUrl } = useMutation(
         ()=> {return apiClient.get(`wx/wx1e172dfca3c637d5/user/authorizationUrl?scope=snsapi_userinfo&redirectUri=${window.location.href}`);},

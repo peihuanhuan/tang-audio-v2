@@ -32,19 +32,6 @@ export default function WeixinLogin() {
     const [deleteVisible, setDeleteVisible] = useState(false);
     const [deletingId, setDeleteId] = useState(null);
 
-    const {mutate: getBaiduAuthorizationUrl} = useMutation(
-        () => {
-            return apiClient.get(`baidu/authorizationUrl?redirectUri=http://wx.peihuan.net/baidu-authorization&scope=1`);
-        },
-        {
-            onSuccess: (data) => {
-                if (!data) {
-                    return
-                }
-                window.location.href = data
-            },
-        }
-    );
 
     const {isLoading: fetching, refetch: fetchSubscribes} = useQuery('subscribes',
         code => {
@@ -63,6 +50,7 @@ export default function WeixinLogin() {
 
     useEffect(() => {
         if (!localStorageGet("token")) {
+            navigate(`/weixin-authorization?redirectUrl=${window.location.href}`, {});
             return
         }
 

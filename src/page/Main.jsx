@@ -98,19 +98,6 @@ export default function Main() {
         {key: '总时长(分钟)', value: totalDuration},
     ];
 
-    const {mutate: getBaiduAuthorizationUrl} = useMutation(
-        () => {
-            return apiClient.get(`baidu/authorizationUrl?redirectUri=http://wx.peihuan.net/baidu-authorization&scope=1`);
-        },
-        {
-            onSuccess: (data) => {
-                if (!data) {
-                    return
-                }
-                window.location.href = data
-            },
-        }
-    );
 
     const navigate = useNavigate();
 
@@ -368,7 +355,7 @@ export default function Main() {
                 title="授权百度网盘"
                 visible={baiduAuthModalVisible}
                 width="80%"
-                onOk={getBaiduAuthorizationUrl}
+                onOk={() => navigate(`/baidu-authorization?backUrl=${window.location.href}`, {})}
                 onCancel={() => setBaiduAuthModalVisible(false)}
                 closeOnEsc={true}
             >

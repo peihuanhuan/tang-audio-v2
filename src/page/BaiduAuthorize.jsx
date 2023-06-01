@@ -4,13 +4,35 @@ import {useEffect, useState} from "react";
 import {localStorageGet, localStorageSet} from "../util/expire-localstore";
 import {useMutation} from "react-query";
 import apiClient from "../util/http-common";
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 
 export default function BaiduAuthorize() {
 
     const navigate = useNavigate();
 
+    const [params] = useSearchParams()
+    const backUrl = params.getAll('backUrl')[0];
+    // state 里存的是  backUrl
+    const state = params.getAll('state')[0];
+
+    console.log("=== baidu redirectUrl ", backUrl, params)
     const [msg, setMsg] = useState("跳转中，请稍后...")
+
+    const {mutate: jumpToBaiduAuthorizationUrl} = useMutation(
+        () => {
+            // baidu redirectUri 上貌似不允许有参数。
+
+            return apiClient.get(`baidu/authorizationUrl?redirectUri=${window.location.href.split('?')[0]}&scope=1&state=${backUrl}`);
+        },
+        {
+            onSuccess: (data) => {
+                if (!data) {
+                    return
+                }
+                window.location.href = data
+            },
+        }
+    );
 
     const { isLoading: _, mutate: baiduAuth } = useMutation(
         code => {
@@ -21,7 +43,7 @@ export default function BaiduAuthorize() {
             onSuccess: (data) => {
                 if (!data) { return }
                 setMsg("授权成功")
-                navigate('/bilibili-audio', {});
+                window.location.href = state
             },
         }
     );
@@ -31,6 +53,8 @@ export default function BaiduAuthorize() {
         let code = queryString.parse(window.location.search)["code"]
         if (code != null) {
             baiduAuth(code)
+        } else {
+            jumpToBaiduAuthorizationUrl()
         }
     }, [])
 
