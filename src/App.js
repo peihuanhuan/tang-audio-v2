@@ -1,7 +1,9 @@
 import logo from './logo.svg';
 import './App.css';
 import { hot } from 'react-hot-loader/root';
+import BilibiliSubmit from './page/BilibiliSubmit'
 import Main from './page/Main'
+
 import Douyin from './page/Douyin'
 import WeixinLogin from './page/WeixinLogin'
 import BilibiliSubscribe from './page/BilibiliSubscribe'
@@ -24,7 +26,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/bilibili-audio",
-        element: <Main/>,
+        element: <BilibiliSubmit/>,
     },
     {
         path: "/baidu-authorization",
