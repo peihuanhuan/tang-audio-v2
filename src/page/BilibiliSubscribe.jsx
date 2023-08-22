@@ -109,7 +109,7 @@ export default function WeixinLogin() {
                                 }
                                 {
                                     item.lastCid == null && <p style={{ color: 'red', margin: '4px 0', }}>
-                                        正在保存历史视频中...
+                                        将于凌晨开始保存历史视频
                                     </p>
                                 }
                                 {
