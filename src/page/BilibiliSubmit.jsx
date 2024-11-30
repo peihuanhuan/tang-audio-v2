@@ -196,6 +196,11 @@ export default function BilibiliSubmit() {
                 }
                 setSubscribeStatus(data.subscribeStatus)
                 setHasBaiduAuthorization(data.baiduAuthorization)
+
+                if (defaultShareType === "3" && data.baiduAuthorization === false) {
+                    setBaiduAuthModalVisible(true)
+                }
+
                 setButtonLoading(false)
                 setEnableSubmit(true)
                 if (data["subscribeStatus"] !== "ON") {
