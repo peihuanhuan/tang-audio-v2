@@ -324,7 +324,7 @@ export default function BilibiliSubmit() {
                 <RadioGroup field='outputType' label="是否提取视频" initValue={"0"}>
                     <Radio value="0">仅提取音频</Radio>
                     <Radio value="1">完整视频</Radio>
-                    <Radio value="2" disabled>文字</Radio>
+                    <Radio value="2">文字</Radio>
                 </RadioGroup>
 
                 <RadioGroup field="type" label='解析模式' onChange={(x) => {
