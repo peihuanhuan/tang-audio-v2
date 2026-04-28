@@ -333,7 +333,7 @@ export default function BilibiliSubmit() {
                             initValue={"1"}>
                     <Radio value="1">默认</Radio>
                     <Radio value="2">分p稿件/合集</Radio>
-                    <Radio value="3">Up主</Radio>
+                    <Radio value="3" disabled >Up主</Radio>
                 </RadioGroup>
 
                 <TextArea rules={[{required: true, message: '请填写视频链接'},]} field='data' label={"视频链接"}
